@@ -55,7 +55,7 @@ function listSongs(req, res)
       writeResult(req, res, {'error' : err});
     else
     {
-      con.query("SELECT * FROM SONG ORDER BY SONG_NAME", function (err, result, fields) 
+      con.query("SELECT SONG_ID, USER_ID, SONG_NAME FROM SONG WHERE USER_ID = (?)", [req.session.user.result.id], function (err, result, fields) 
       {
         if (err) 
           writeResult(req, res, {'error' : err});
@@ -73,7 +73,6 @@ function addSong(req, res)
     writeResult(req, res, {'error' : "Please Login"});
     return;
   }
-
   else
   {
     var con = mysql.createConnection(conInfo);
@@ -83,13 +82,13 @@ function addSong(req, res)
         writeResult(req, res, {'error' : err});
       else
       {
-        con.query('INSERT INTO SONG (SONG_NAME) VALUES (?)', [req.query.song], function (err, result, fields) 
+        con.query('INSERT INTO SONG (SONG_NAME, USER_ID) VALUES (?,?);', [req.query.song, req.session.user.result.id], function (err, result, fields) 
         {
           if (err) 
             writeResult(req, res, {'error' : err});
           else
           {
-            con.query("SELECT * FROM SONG ORDER BY SONG_NAME", function (err, result, fields) 
+            con.query("SELECT SONG_ID, USER_ID , SONG_NAME FROM SONG WHERE USER_ID = ?; ", [req.session.user.result.id], function (err, result, fields) 
             {
               if (err) 
                 writeResult(req, res, {'error' : err});
@@ -116,13 +115,13 @@ function removeSong(req, res)
         writeResult(req, res, {'error' : err});
       else
       {
-        con.query('DELETE FROM SONG WHERE SONG_NAME = ?', [req.query.song], function (err, result, fields) 
+        con.query("DELETE FROM SONG WHERE SONG_NAME = ?", [req.query.song], function (err, result, fields) 
         {
           if (err) 
             writeResult(req, res, {'error' : err});
           else
           {
-            con.query("SELECT * FROM SONG ORDER BY SONG_NAME", function (err, result, fields) 
+            con.query("SELECT SONG_ID, USER_ID ,SONG_NAME FROM SONG", function (err, result, fields) 
             {
               if (err) 
                 writeResult(req, res, {'error' : err});
@@ -166,6 +165,8 @@ function clearSongs(req, res)
 
 function register(req, res)
 {
+  
+   
   if (req.query.email == undefined || !validateEmail(req.query.email))
   {
     writeResult(req, res, {'error' : "Please specify a valid email"});
@@ -177,7 +178,6 @@ function register(req, res)
     writeResult(req, res, {'error' : "Password must have a minimum of eight characters, at least one letter and one number"});
     return;
   }
-
   var con = mysql.createConnection(conInfo);
   con.connect(function(err) 
   {
@@ -218,6 +218,7 @@ function register(req, res)
 
 function login(req, res)
 {
+   
   if (req.query.email == undefined)
   {
     writeResult(req, res, {'error' : "Email is required"});
@@ -295,12 +296,4 @@ function validatePassword(pass)
     var re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     return re.test(pass);
   }
-}
-
-
-function writeResult(req, res, obj)
-{
-  res.writeHead(200, {'Content-Type': 'application/json'});
-  res.write(JSON.stringify(obj));
-  res.end('');
 }
