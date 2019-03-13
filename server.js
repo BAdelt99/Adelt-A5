@@ -69,15 +69,9 @@ function listSongs(req, res)
 function addSong(req, res)
 {
   if (req.session.user == undefined)
-  {
     writeResult(req, res, {'error' : "Please Login"});
-    return;
-  }
-  if (req.session.song == undefined)
-  {
-    writeResult(req, res, {'error' : "Please enter a song"});
-    return;
-  }
+    if (req.query.song == undefined)
+    writeResult(req, res, {'error' : "addSong requires you to enter a song"});
   else
   {
     var con = mysql.createConnection(conInfo);
@@ -109,8 +103,12 @@ function addSong(req, res)
 
 function removeSong(req, res)
 {
-  if (req.query.song == undefined)
-    writeResult(req, res, {'error' : "add requires you to enter a song"});
+  if (req.session.user == undefined)
+    writeResult(req, res, {'error' : "Please login to remove a song"});
+    
+ if (req.query.song == undefined)
+    writeResult(req, res, {'error' : "remove requires you to enter a song"});
+  
   else
   {
     var con = mysql.createConnection(conInfo);
