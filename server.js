@@ -73,6 +73,11 @@ function addSong(req, res)
     writeResult(req, res, {'error' : "Please Login"});
     return;
   }
+  if (req.session.song == undefined)
+  {
+    writeResult(req, res, {'error' : "Please enter a song"});
+    return;
+  }
   else
   {
     var con = mysql.createConnection(conInfo);
