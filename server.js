@@ -144,13 +144,13 @@ function clearSongs(req, res)
       writeResult(req, res, {'error' : err});
     else
     {
-      con.query('DELETE FROM SONG', function (err, result, fields) 
+      con.query('DELETE FROM SONG WHERE USER_ID = ?', [req.session.user.result.id], function (err, result, fields) 
       {
         if (err) 
           writeResult(req, res, {'error' : err});
         else
         {
-          con.query("SELECT * FROM SONG ORDER BY SONG_NAME", function (err, result, fields) 
+          con.query("SELECT SONG_ID, USER_ID ,SONG_NAME FROM SONG WHERE USER_ID = ?", [req.session.user.result.id], function (err, result, fields) 
           {
             if (err) 
               writeResult(req, res, {'error' : err});
